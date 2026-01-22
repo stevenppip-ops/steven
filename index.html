@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El mejor Cine: Estreno Mi Villano Favorito 4</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 0; overflow-x: hidden; }
+        #aviso-urgente { background: #e74c3c; color: white; padding: 15px; font-weight: bold; border-radius: 8px; margin: 15px; border: 2px solid #fff; animation: parpadeo 1.5s infinite; }
+        @keyframes parpadeo { 0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;} }
+        .header-cine { padding: 20px; }
+        h1 { color: #f1c40f; text-transform: uppercase; font-size: 1.5rem; }
+        .cine-container { width: 100%; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+        .video-wrapper { width: 100%; aspect-ratio: 16 / 9; position: relative; background: #000; max-width: 900px; width: 100%; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .servidores { margin: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .cont-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn-interfaz { background: #222; color: #aaa; border: 1px solid #444; padding: 12px 20px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+        .btn-interfaz.active { background: #f1c40f; color: #000; border: none; }
+        #msgAlerta { color: #f1c40f; font-size: 0.85rem; font-weight: bold; margin-top: 10px; max-width: 85%; line-height: 1.4; display: none; }
+        .caja-pasos { padding: 20px; background: #111; border: 1px dashed #f1c40f; margin: 10px; border-radius: 10px; z-index: 1000; position: relative; }
+        .timer-info { color: #f1c40f; font-size: 0.9rem; margin-top: 10px; height: 20px; font-weight: bold; }
+        #adsOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; overflow-y: auto; padding: 20px 0; }
+        .ad-item { margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 20px; }
+        .video-ad { width: 90%; max-width: 500px; aspect-ratio: 16 / 9; border: none; }
+        .btn-skip { background: #e74c3c; color: #fff; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        #btnEntradaFinal { display: none; background: #27ae60; color: white; padding: 20px; width: 80%; max-width: 400px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin: 20px auto; }
+        .votos-seccion { margin: 20px; padding: 15px; background: #111; border-radius: 10px; }
+        .btn-voto { background: #34495e; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body onload="verificarEstado()">
+
+    <div id="aviso-urgente">⚠️ ESTA PELÍCULA SOLO DURARÁ 5 DÍAS. LUEGO SE ELIMINARÁ TODO EL CONTENIDO.</div>
+
+    <div class="header-cine">
+        <h1 id="mainTitle">EL MEJOR ESTRENO: MI VILLANO FAVORITO 4</h1>
+        <div id="selectorServidores" class="servidores">
+            <div class="cont-btns">
+                <button id="btnG" class="btn-interfaz active" onclick="seleccionar('G1')">SERVIDOR 1</button>
+                <button id="btnV" class="btn-interfaz" onclick="seleccionar('VOE')">SERVIDOR 2 (HD)</button>
+                <button id="btnS" class="btn-interfaz" onclick="seleccionar('PREMIUM')">SERVIDOR PREMIUM</button>
+            </div>
+            <div id="msgAlerta" style="display:block;">SI EL SERVIDOR 1 NO TE FUNCIONA ES PORQUE ESTÁ SATURADO.</div>
+        </div>
+    </div>
+
+    <div class="cine-container">
+        <div class="video-wrapper">
+            <div id="contPasos" class="caja-pasos">
+                <p id="txtPasos" style="color:#f1c40f; font-weight:bold;">PASO 1 DE 5</p>
+                <button id="btnAccion" class="btn-interfaz active" onclick="ejecutarPaso()">🔓 DESBLOQUEAR PELÍCULA</button>
+                <div id="timerTxt" class="timer-info"></div>
+                <div id="robotArea" style="display:none; margin-top:20px; background:#222; padding:15px; border-radius:8px;">
+                    <input type="checkbox" id="checkRobot" onclick="abrirAds()"> 
+                    <label for="checkRobot" style="cursor:pointer;">No soy un robot</label>
+                </div>
+            </div>
+            <iframe id="pantalla" src="" allowfullscreen style="display:none;"></iframe>
+        </div>
+    </div>
+
+    <div class="votos-seccion" id="seccionVotos" style="display:none;">
+        <p>¿Qué te pareció la película?</p>
+        <button class="btn-voto" onclick="alert('¡Gracias por tu voto!')">👍 Excelente</button>
+    </div>
+
+    <div id="adsOverlay">
+        <h2 style="color:#f1c40f;">VERIFICACIÓN</h2>
+        <div class="ad-item">
+            <iframe id="va1" class="video-ad" src=""></iframe><br>
+            <button id="sk1" class="btn-skip" onclick="saltar(1)">SALTAR ANUNCIO</button>
+        </div>
+        <div class="ad-item">
+            <iframe id="va2" class="video-ad" src=""></iframe><br>
+            <button id="sk2" class="btn-skip" onclick="saltar(2)">SALTAR ANUNCIO</button>
+        </div>
+        <div class="ad-item">
+            <iframe id="va3" class="video-ad" src=""></iframe><br>
+            <button id="sk3" class="btn-skip" onclick="saltar(3)">SALTAR ANUNCIO</button>
+        </div>
+        <button id="btnEntradaFinal" onclick="finalizarCine()">🎟️ VER PELÍCULA</button>
+    </div>
+
+    <script>
+        const _0xG1 = "aHR0cHM6Ly92b2Uuc3gvZS9jZXRhbWs4YXlmbHIK"; 
+        const _0xV1 = "aHR0cHM6Ly9zdHJlYW10YXBlLmNvbS9lL0ExTHpkd29ZZ0pGWDNKQi8=";
+        const _0xPR = "aHR0cHM6Ly9tZWdhLm56L2VtYmVkL3I4WlV5S0JEI2FCWmRIdGYxV2NBUGl2MzJQc2s1UEJ3QzVjd0FSVE1xUlJncGJVSHZBdFk="; 
+        
+        const linkAnuncio = "https://otieu.com/4/10022394";
+        const v = ["https://www.youtube.com/embed/UDYCc4dbSJU?autoplay=1", "https://www.youtube.com/embed/5Od0aOse1wc?autoplay=1", "https://www.youtube.com/embed/xg9a0yWO4xQ?autoplay=1"];
+
+        let paso = 1, totalPasos = 5, serv = 'G1', espera = false, saltos = 0;
+
+        function verificarEstado() {
+            if (sessionStorage.getItem("cine_temp_desbloqueo") === "true") {
+                serv = sessionStorage.getItem("ultimo_serv") || 'G1';
+                finalizarCine();
+            }
+        }
+
+        function seleccionar(t) {
+            if (t === 'PREMIUM') {
+                if (!confirm("Este servidor es Premium y requiere 10 pasos de verificación para acceso ilimitado. ¿Aceptar?")) return;
+                totalPasos = 10;
+            } else {
+                totalPasos = 5;
+            }
+            serv = t;
+            sessionStorage.setItem("ultimo_serv", t);
+            if (sessionStorage.getItem("cine_temp_desbloqueo") !== "true") resetProceso();
+            else finalizarCine();
+            actualizarInterfaz(t);
+        }
+
+        function actualizarInterfaz(t) {
+            document.getElementById('msgAlerta').style.display = (t === 'G1') ? 'block' : 'none';
+            document.getElementById('btnG').className = 'btn-interfaz' + (t === 'G1' ? ' active' : '');
+            document.getElementById('btnV').className = 'btn-interfaz' + (t === 'VOE' ? ' active' : '');
+            document.getElementById('btnS').className = 'btn-interfaz' + (t === 'PREMIUM' ? ' active' : '');
+        }
+
+        function resetProceso() {
+            paso = 1; saltos = 0; espera = false;
+            document.getElementById('pantalla').style.display = 'none';
+            document.getElementById('contPasos').style.display = 'block';
+            document.getElementById('btnAccion').style.display = 'inline-block';
+            document.getElementById('btnAccion').disabled = false;
+            document.getElementById('robotArea').style.display = 'none';
+            document.getElementById('txtPasos').innerText = "PASO 1 DE " + totalPasos;
+            document.getElementById('timerTxt').innerText = "";
+            document.getElementById('checkRobot').checked = false;
+        }
+
+        function ejecutarPaso() {
+            if (espera) return;
+            window.open(linkAnuncio, "_blank");
+            const btn = document.getElementById('btnAccion');
+            const txt = document.getElementById('timerTxt');
+            espera = true; let s = 5; btn.disabled = true;
+            let int = setInterval(() => {
+                s--; txt.innerText = `Espera ${s}s...`;
+                if (s <= 0) { 
+                    clearInterval(int); espera = false; btn.disabled = false;
+                    if (paso < totalPasos) { paso++; document.getElementById('txtPasos').innerText = `PASO ${paso} DE ${totalPasos}`; }
+                    else { btn.style.display = 'none'; document.getElementById('robotArea').style.display = 'block'; }
+                }
+            }, 1000);
+        }
+
+        function abrirAds() {
+            window.open(linkAnuncio, "_blank");
+            document.getElementById('adsOverlay').style.display = 'block';
+            document.getElementById('va1').src = v[0]; document.getElementById('va2').src = v[1]; document.getElementById('va3').src = v[2];
+        }
+
+        function saltar(n) {
+            window.open(linkAnuncio, "_blank");
+            document.getElementById('sk' + n).style.display = 'none';
+            document.getElementById('va' + n).src = ""; saltos++;
+            if (saltos >= 3) document.getElementById('btnEntradaFinal').style.display = 'block';
+        }
+
+        function finalizarCine() {
+            sessionStorage.setItem("cine_temp_desbloqueo", "true");
+            document.getElementById('adsOverlay').style.display = 'none';
+            document.getElementById('contPasos').style.display = 'none';
+            document.getElementById('selectorServidores').style.display = 'none';
+            
+            const p = document.getElementById('pantalla');
+            if(serv === 'PREMIUM') p.src = atob(_0xPR);
+            else if(serv === 'VOE') p.src = atob(_0xV1);
+            else p.src = atob(_0xG1);
+            
+            p.style.display = 'block';
+            document.getElementById('seccionVotos').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
